@@ -1,21 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { LogOut, Menu, Plus, Settings, User } from "lucide-react";
 import Link from "next/link";
-import {
-  ChevronDown,
-  Home,
-  LogOut,
-  Menu,
-  Plus,
-  Settings,
-  User,
-  Users,
-  ArrowRight,
-  X,
-} from "lucide-react";
+import { useState } from "react";
 
 import { AddExpenseDialog } from "@/components/add-expense-dialog";
+import { CreateGroupDialog } from "@/components/create-group-dialog";
+import { DesktopSidebar } from "@/components/desktop-sidebar";
+import { JoinGroupDialog } from "@/components/join-group-dialog";
+import { MobileSidebar } from "@/components/mobile-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,32 +19,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreateGroupDialog } from "@/components/create-group-dialog";
-import { JoinGroupDialog } from "@/components/join-group-dialog";
-import {
-  useGroups,
-  useCreateGroup,
-  useDeleteGroup,
-  useAddMember,
-} from "@/hooks/groups";
-
-interface DesktopSidebarProps {
-  selectedGroup: string | null;
-  setSelectedGroup: (group: string | null) => void;
-  setIsCreateGroupOpen: (isOpen: boolean) => void;
-  setIsJoinGroupOpen: (isOpen: boolean) => void;
-}
-
-interface MobileSidebarProps {
-  setIsCreateGroupOpen: (isOpen: boolean) => void;
-  setIsJoinGroupOpen: (isOpen: boolean) => void;
-}
+import { useGroups } from "@/hooks/groups";
 
 export default function DashboardPage() {
-  // const { data: groups, isLoading } = useGroups();
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState("apartment");
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
+
+  const { data: groups, isLoading: isGroupsLoading } = useGroups();
+
   // const createGroupMutation = useCreateGroup();
   // const deleteGroupMutation = useDeleteGroup();
   // const addMemberMutation = useAddMember();
@@ -82,10 +61,6 @@ export default function DashboardPage() {
   //     // Handle error
   //   }
   // };
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState("apartment");
-  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
-  const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -99,6 +74,8 @@ export default function DashboardPage() {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 sm:max-w-none">
             <MobileSidebar
+              groups={groups}
+              isLoading={isGroupsLoading}
               setIsCreateGroupOpen={setIsCreateGroupOpen}
               setIsJoinGroupOpen={setIsJoinGroupOpen}
             />
@@ -148,6 +125,8 @@ export default function DashboardPage() {
       <div className="grid flex-1 md:grid-cols-[240px_1fr]">
         <aside className="hidden border-r md:block">
           <DesktopSidebar
+            groups={groups}
+            isLoading={isGroupsLoading}
             selectedGroup={selectedGroup}
             setSelectedGroup={setSelectedGroup}
             setIsCreateGroupOpen={setIsCreateGroupOpen}
@@ -163,14 +142,17 @@ export default function DashboardPage() {
                   <TabsTrigger value="expenses">Expenses</TabsTrigger>
                   <TabsTrigger value="balances">Balances</TabsTrigger>
                 </TabsList>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsAddExpenseOpen(true)}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Expense
-                </Button>
+                <div className="flex items-center gap-4">
+                  <p className="opacity-70 font-semibold">{selectedGroup}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAddExpenseOpen(true)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Expense
+                  </Button>
+                </div>
               </div>
               <TabsContent value="overview" className="p-4 md:p-6">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -362,136 +344,6 @@ export default function DashboardPage() {
         onOpenChange={setIsJoinGroupOpen}
       />
     </div>
-  );
-}
-
-function DesktopSidebar({
-  selectedGroup,
-  setSelectedGroup,
-  setIsCreateGroupOpen,
-  setIsJoinGroupOpen,
-}: DesktopSidebarProps) {
-  return (
-    <div className="flex h-full flex-col gap-2 p-4">
-      <div className="flex h-12 items-center gap-2 px-2 font-semibold">
-        <Home className="h-5 w-5" />
-        <span>Dashboard</span>
-      </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="px-2 text-sm font-medium text-muted-foreground">
-          My Groups
-        </h3>
-        <Button
-          variant={selectedGroup === "apartment" ? "secondary" : "ghost"}
-          className="justify-start"
-          onClick={() => setSelectedGroup("apartment")}
-        >
-          <Users className="mr-2 h-5 w-5" />
-          Apartment
-        </Button>
-        <Button
-          variant={selectedGroup === "trip" ? "secondary" : "ghost"}
-          className="justify-start"
-          onClick={() => setSelectedGroup("trip")}
-        >
-          <Users className="mr-2 h-5 w-5" />
-          Spring Break Trip
-        </Button>
-        <Button
-          variant={selectedGroup === "study" ? "secondary" : "ghost"}
-          className="justify-start"
-          onClick={() => setSelectedGroup("study")}
-        >
-          <Users className="mr-2 h-5 w-5" />
-          Study Group
-        </Button>
-        <Button
-          variant="ghost"
-          className="justify-start text-primary"
-          onClick={() => setIsJoinGroupOpen(true)}
-        >
-          <ArrowRight className="mr-2 h-5 w-5" />
-          Join Group
-        </Button>
-        <Button
-          variant="ghost"
-          className="justify-start text-primary"
-          onClick={() => setIsCreateGroupOpen(true)}
-        >
-          <Plus className="mr-2 h-5 w-5" />
-          Create New Group
-        </Button>
-      </div>
-      <div className="mt-auto">
-        <Button variant="outline" className="w-full justify-start">
-          <Settings className="mr-2 h-5 w-5" />
-          Settings
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function MobileSidebar({
-  setIsCreateGroupOpen,
-  setIsJoinGroupOpen,
-}: MobileSidebarProps) {
-  return (
-    <ScrollArea className="h-full">
-      <div className="flex flex-col gap-2 p-4">
-        <div className="flex h-12 items-center justify-between">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1 font-semibold text-2xl"
-          >
-            SplitUL
-          </Link>
-        </div>
-        <div className="flex flex-col gap-1">
-          <h3 className="px-2 text-sm font-medium text-muted-foreground">
-            My Groups
-          </h3>
-          <Button variant="ghost" className="justify-start">
-            <Users className="mr-2 h-5 w-5" />
-            Apartment
-          </Button>
-          <Button variant="ghost" className="justify-start">
-            <Users className="mr-2 h-5 w-5" />
-            Spring Break Trip
-          </Button>
-          <Button variant="ghost" className="justify-start">
-            <Users className="mr-2 h-5 w-5" />
-            Study Group
-          </Button>
-          <Button
-            variant="ghost"
-            className="justify-start text-primary"
-            onClick={() => setIsJoinGroupOpen(true)}
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Join Group
-          </Button>
-          <Button
-            variant="ghost"
-            className="justify-start text-primary"
-            onClick={() => setIsCreateGroupOpen(true)}
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Create New Group
-          </Button>
-        </div>
-        <div className="mt-auto">
-          <Button variant="outline" className="w-full justify-start">
-            <Settings className="mr-2 h-5 w-5" />
-            Settings
-          </Button>
-          <Button variant="outline" className="mt-2 w-full justify-start">
-            <LogOut className="mr-2 h-5 w-5" />
-            Log out
-          </Button>
-        </div>
-      </div>
-    </ScrollArea>
   );
 }
 
