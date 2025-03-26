@@ -25,7 +25,7 @@ import { useGroups } from "@/hooks/groups";
 
 export default function DashboardPage() {
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState("apartment");
+  const [selectedGroup, setSelectedGroup] = useState();
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
 

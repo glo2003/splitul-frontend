@@ -7,8 +7,8 @@ import { ErrorMessage } from "./error-message";
 interface DesktopSidebarProps {
   groups: Group[] | undefined;
   isLoading: boolean;
-  selectedGroup: string | null;
-  setSelectedGroup: (group: string) => void;
+  selectedGroup: string | undefined;
+  setSelectedGroup: (group: string | undefined) => void;
   setIsCreateGroupOpen: (isOpen: boolean) => void;
   setIsJoinGroupOpen: (isOpen: boolean) => void;
 }
