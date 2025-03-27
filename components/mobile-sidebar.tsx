@@ -26,7 +26,7 @@ export function MobileSidebar({
     return (
       <>
         {groups.map((group) => (
-          <Button key={group.name} className="justify-start">
+          <Button key={group.name} variant="ghost" className="justify-start">
             <Users className="mr-2 h-5 w-5" />
             {group.name}
           </Button>
@@ -37,7 +37,7 @@ export function MobileSidebar({
           onClick={() => setIsJoinGroupOpen(true)}
         >
           <ArrowRight className="mr-2 h-5 w-5" />
-          Join Group
+          Join A Group
         </Button>
         <Button
           variant="ghost"

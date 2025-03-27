@@ -1,7 +1,4 @@
-"use client";
-
 import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,20 +23,6 @@ export function CreateGroupDialog({
   handleCreateGroup,
 }: Props) {
   const [groupName, setGroupName] = useState("");
-  // const createGroupMutation = useCreateGroup();
-
-  // const handleCreateGroup = async (e: HTMLFormElement) => {
-  //   e.preventDefault();
-  //   console.log("Creating group:", groupName);
-  //
-  //   try {
-  //     await createGroupMutation.mutateAsync(groupName);
-  //   } catch (error) {
-  //     onError(error);
-  //   }
-  //   setGroupName("");
-  //   onOpenChange(false);
-  // };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -72,7 +55,10 @@ export function CreateGroupDialog({
           </Button>
           <Button
             type="submit"
-            onSubmit={() => handleCreateGroup(groupName)}
+            onClick={() => {
+              handleCreateGroup(groupName);
+              onOpenChange(false);
+            }}
             disabled={!groupName.trim()}
           >
             Create group

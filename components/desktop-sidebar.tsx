@@ -45,7 +45,7 @@ export function DesktopSidebar({
           onClick={() => setIsJoinGroupOpen(true)}
         >
           <ArrowRight className="mr-2 h-5 w-5" />
-          Join Group
+          Join A Group
         </Button>
         <Button
           variant="ghost"

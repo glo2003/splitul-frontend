@@ -19,7 +19,7 @@ export type ExpensesHistoryResponse = {
 };
 
 export type Group = {
-  members: Member[];
+  members: string[];
   name: string;
 };
 
@@ -30,7 +30,7 @@ const listGroups = async (): Promise<Group[]> => {
 };
 
 const createGroup = async (groupName: string): Promise<void> => {
-  return httpClient.request({
+  httpClient.request({
     endpoint: "/groups",
     method: "POST",
     body: { name: groupName },
@@ -59,7 +59,7 @@ const addMember = async (
   groupName: string,
   memberName: string,
 ): Promise<void> => {
-  return httpClient.request({
+  httpClient.request({
     endpoint: `/groups/${groupName}/members`,
     method: "POST",
     body: { memberName },

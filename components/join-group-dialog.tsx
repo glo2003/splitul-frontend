@@ -1,5 +1,3 @@
-"use client";
-
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -14,72 +12,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { useGroups } from "@/hooks/groups";
 import { Group } from "@/api/groups";
-
-// const availableGroups = [
-//   {
-//     id: "g1",
-//     name: "Campus Housing",
-//     description: "For students living in the north campus dorms",
-//     members: 8,
-//     avatar: "/placeholder.svg?height=40&width=40&text=CH",
-//   },
-//   {
-//     id: "g2",
-//     name: "CS Study Group",
-//     description: "Split costs for study materials and snacks",
-//     members: 12,
-//     avatar: "/placeholder.svg?height=40&width=40&text=CS",
-//   },
-//   {
-//     id: "g3",
-//     name: "Basketball Team",
-//     description: "Team expenses and tournament fees",
-//     members: 15,
-//     avatar: "/placeholder.svg?height=40&width=40&text=BT",
-//   },
-//   {
-//     id: "g4",
-//     name: "Road Trip 2024",
-//     description: "Summer road trip expenses",
-//     members: 6,
-//     avatar: "/placeholder.svg?height=40&width=40&text=RT",
-//   },
-//   {
-//     id: "g5",
-//     name: "Film Club",
-//     description: "Equipment rentals and event costs",
-//     members: 20,
-//     avatar: "/placeholder.svg?height=40&width=40&text=FC",
-//   },
-//   {
-//     id: "g6",
-//     name: "Apartment 4B",
-//     description: "Shared apartment expenses",
-//     members: 4,
-//     avatar: "/placeholder.svg?height=40&width=40&text=4B",
-//   },
-//   {
-//     id: "g7",
-//     name: "Graduation Party",
-//     description: "Planning the end of year celebration",
-//     members: 25,
-//     avatar: "/placeholder.svg?height=40&width=40&text=GP",
-//   },
-// ];
 
 interface JoinGroupDialogProps {
   open: boolean;
+  groups: Group[] | undefined;
   onOpenChange: (isOpen: boolean) => void;
 }
 
-export function JoinGroupDialog({ open, onOpenChange }: JoinGroupDialogProps) {
+export function JoinGroupDialog({
+  open,
+  groups,
+  onOpenChange,
+}: JoinGroupDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [joiningGroup, setJoiningGroup] = useState("");
-
-  const { data: groups, isLoading: isGroupsLoading } = useGroups();
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
 
   useEffect(() => {

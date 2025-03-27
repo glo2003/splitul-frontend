@@ -21,8 +21,10 @@ export function useCreateGroup() {
 
   return useMutation({
     mutationFn: (groupName: string) => createGroup(groupName),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["groups"],
+      });
     },
   });
 }
@@ -55,9 +57,12 @@ export function useAddMember() {
       groupName: string;
       memberName: string;
     }) => addMember(groupName, memberName),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
         queryKey: ["groups", variables.groupName],
+      });
+      await queryClient.refetchQueries({
+        queryKey: ["groups"],
       });
     },
   });

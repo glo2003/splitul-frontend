@@ -39,7 +39,9 @@ class HttpClient {
         throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
 
-      return response.json();
+      if (response.status == 200) {
+        return response.json();
+      }
     } catch (error) {
       if (error instanceof Error) {
         if (error.name == "AbortError") {

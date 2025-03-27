@@ -1,9 +1,9 @@
 "use client";
 
-import { LogOut, Menu, Plus, Settings, User } from "lucide-react";
+import { LogOut, Menu, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
+import { useUser } from "../../contexts/user-context";
 import { AddExpenseDialog } from "@/components/add-expense-dialog";
 import { CreateGroupDialog } from "@/components/create-group-dialog";
 import { DesktopSidebar } from "@/components/desktop-sidebar";
@@ -21,41 +21,49 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGroups } from "@/hooks/groups";
+import { useCreateGroup, useGroups, useAddMember } from "@/hooks/groups";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState();
+  const [selectedGroup, setSelectedGroup] = useState<string>();
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
 
-  const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  const router = useRouter();
 
-  // const createGroupMutation = useCreateGroup();
-  // const deleteGroupMutation = useDeleteGroup();
-  // const addMemberMutation = useAddMember();
-  //
-  // const handleCreateGroup = async (groupName: string) => {
+  const { userName } = useUser();
+  const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  const createGroupMutation = useCreateGroup();
+  const addMemberMutation = useAddMember();
+
+  const handleCreateGroup = async (groupName: string) => {
+    try {
+      await createGroupMutation.mutateAsync(groupName);
+    } catch (error) {
+      console.error("Error creating group: ", groupName, error);
+    }
+
+    try {
+      await addMemberMutation.mutateAsync({ groupName, memberName: userName });
+    } catch (error) {
+      console.error("Error adding member to group: ", userName, error);
+    }
+  };
+
+  // const handleAddMember = async (groupName: string, memberName: string) => {
   //   try {
-  //     await createGroupMutation.mutateAsync(groupName);
-  //     // Handle success (e.g., show notification)
+  //     await addMemberMutation.mutateAsync({ groupName, memberName });
   //   } catch (error) {
-  //     // Handle error
+  //     console.error("Error creating group:", error);
   //   }
   // };
+
+  // const deleteGroupMutation = useDeleteGroup();
   //
   // const handleDeleteGroup = async (groupName: string, memberName: string) => {
   //   try {
   //     await deleteGroupMutation.mutateAsync({ groupName, memberName });
-  //     // Handle success
-  //   } catch (error) {
-  //     // Handle error
-  //   }
-  // };
-  //
-  // const handleAddMember = async (groupName: string, memberName: string) => {
-  //   try {
-  //     await addMemberMutation.mutateAsync({ groupName, memberName });
   //     // Handle success
   //   } catch (error) {
   //     // Handle error
@@ -89,32 +97,26 @@ export default function DashboardPage() {
             <span className="hidden md:inline-block text-2xl">SplitUL</span>
           </Link>
         </div>
-        <div className="flex flex-1 items-center justify-end gap-4">
+        <div className="flex flex-1 items-center justify-end gap-1">
+          <div className="text-sm font-semibold text-gray-800">{userName}</div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src="/placeholder.svg?height=32&width=32"
-                    alt="User"
-                  />
-                  <AvatarFallback>JD</AvatarFallback>
+                  {/* TODO: Add fallback */}
+                  <AvatarFallback>D</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  localStorage.removeItem("userName"); // Clear stored username
+                  router.push("/");
+                }}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>
@@ -125,7 +127,7 @@ export default function DashboardPage() {
       <div className="grid flex-1 md:grid-cols-[240px_1fr]">
         <aside className="hidden border-r md:block">
           <DesktopSidebar
-            groups={groups}
+            groups={groups?.filter((group) => group.members.includes(userName))}
             isLoading={isGroupsLoading}
             selectedGroup={selectedGroup}
             setSelectedGroup={setSelectedGroup}
@@ -290,10 +292,6 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-center gap-4">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={`/placeholder.svg?height=40&width=40&text=${balance.person.charAt(0)}`}
-                            alt={balance.person}
-                          />
                           <AvatarFallback>
                             {balance.person.charAt(0)}
                           </AvatarFallback>
@@ -338,9 +336,11 @@ export default function DashboardPage() {
       <CreateGroupDialog
         open={isCreateGroupOpen}
         onOpenChange={setIsCreateGroupOpen}
+        handleCreateGroup={handleCreateGroup}
       />
       <JoinGroupDialog
         open={isJoinGroupOpen}
+        groups={groups}
         onOpenChange={setIsJoinGroupOpen}
       />
     </div>
