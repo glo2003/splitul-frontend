@@ -2,14 +2,14 @@
 
 import { LogOut, Menu, Plus } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { useUser } from "../../contexts/user-context";
+import { useState, useEffect } from "react";
+import { useUser } from "../../hooks/user";
 import { AddExpenseDialog } from "@/components/add-expense-dialog";
 import { CreateGroupDialog } from "@/components/create-group-dialog";
 import { DesktopSidebar } from "@/components/desktop-sidebar";
 import { JoinGroupDialog } from "@/components/join-group-dialog";
 import { MobileSidebar } from "@/components/mobile-sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,43 +21,59 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCreateGroup, useGroups, useAddMember } from "@/hooks/groups";
+import {
+  useCreateGroup,
+  useGroups,
+  useAddMember,
+  useExpenses,
+} from "@/hooks/groups";
 import { useRouter } from "next/navigation";
+import { OverviewTab } from "@/components/overview-tab";
 
 export default function DashboardPage() {
+  const { userName } = useUser();
+  const router = useRouter();
+
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>();
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
 
-  const router = useRouter();
-
-  const { userName } = useUser();
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  const { data: expenseHistory, isLoading: isExpensesLoading } = useExpenses(
+    selectedGroup,
+    userName,
+  );
+
   const createGroupMutation = useCreateGroup();
   const addMemberMutation = useAddMember();
+
+  useEffect(() => {
+    if (!userName) {
+      router.push("/");
+    }
+  }, [userName, router]);
+
+  if (!userName) {
+    return null;
+  }
 
   const handleCreateGroup = async (groupName: string) => {
     try {
       await createGroupMutation.mutateAsync(groupName);
-    } catch (error) {
-      console.error("Error creating group: ", groupName, error);
-    }
-
-    try {
       await addMemberMutation.mutateAsync({ groupName, memberName: userName });
     } catch (error) {
       console.error("Error adding member to group: ", userName, error);
     }
   };
 
-  // const handleAddMember = async (groupName: string, memberName: string) => {
-  //   try {
-  //     await addMemberMutation.mutateAsync({ groupName, memberName });
-  //   } catch (error) {
-  //     console.error("Error creating group:", error);
-  //   }
-  // };
+  const handleJoinGroup = async (groupName: string) => {
+    try {
+      await addMemberMutation.mutateAsync({ groupName, memberName: userName });
+    } catch (error) {
+      console.error("Error creating group:", error);
+    }
+  };
 
   // const deleteGroupMutation = useDeleteGroup();
   //
@@ -98,13 +114,14 @@ export default function DashboardPage() {
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end gap-1">
-          <div className="text-sm font-semibold text-gray-800">{userName}</div>
+          <div className="text-sm font-semibold text-gray-800">
+            {userName ?? ""}
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar className="h-8 w-8">
-                  {/* TODO: Add fallback */}
-                  <AvatarFallback>D</AvatarFallback>
+                  <AvatarFallback>{userName[0] ?? ""}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -127,6 +144,7 @@ export default function DashboardPage() {
       <div className="grid flex-1 md:grid-cols-[240px_1fr]">
         <aside className="hidden border-r md:block">
           <DesktopSidebar
+            key={groups?.length}
             groups={groups?.filter((group) => group.members.includes(userName))}
             isLoading={isGroupsLoading}
             selectedGroup={selectedGroup}
@@ -141,7 +159,6 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between border-b px-4 py-2">
                 <TabsList>
                   <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="expenses">Expenses</TabsTrigger>
                   <TabsTrigger value="balances">Balances</TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-4">
@@ -156,127 +173,7 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               </div>
-              <TabsContent value="overview" className="p-4 md:p-6">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  <div className="rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">Total Group Expenses</h3>
-                    </div>
-                    <div className="mt-4">
-                      <div className="text-3xl font-bold">$487.65</div>
-                      <p className="text-sm text-muted-foreground">
-                        Last 30 days
-                      </p>
-                    </div>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">You Owe</h3>
-                    </div>
-                    <div className="mt-4">
-                      <div className="text-3xl font-bold text-red-500">
-                        $78.42
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        To 2 people
-                      </p>
-                    </div>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">You Are Owed</h3>
-                    </div>
-                    <div className="mt-4">
-                      <div className="text-3xl font-bold text-green-500">
-                        $124.50
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        From 1 person
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-6">
-                  <h3 className="mb-4 font-semibold">Recent Activity</h3>
-                  <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between rounded-lg border p-4"
-                      >
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              src={`/placeholder.svg?height=40&width=40&text=${activity.user.charAt(0)}`}
-                              alt={activity.user}
-                            />
-                            <AvatarFallback>
-                              {activity.user.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">
-                              {activity.description}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {activity.date}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p
-                            className={`font-medium ${activity.amount.startsWith("+") ? "text-green-500" : activity.amount.startsWith("-") ? "text-red-500" : ""}`}
-                          >
-                            {activity.amount}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {activity.category}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="expenses" className="p-4 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">All Expenses</h3>
-                </div>
-                <div className="space-y-4">
-                  {expenses.map((expense, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between rounded-lg border p-4"
-                    >
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={`/placeholder.svg?height=40&width=40&text=${expense.paidBy.charAt(0)}`}
-                            alt={expense.paidBy}
-                          />
-                          <AvatarFallback>
-                            {expense.paidBy.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{expense.description}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Paid by {expense.paidBy} • {expense.date}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">
-                          ${expense.amount.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {expense.category}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
+              <OverviewTab expenseHistory={expenseHistory} />
               <TabsContent value="balances" className="p-4 md:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Current Balances</h3>
@@ -342,6 +239,7 @@ export default function DashboardPage() {
         open={isJoinGroupOpen}
         groups={groups}
         onOpenChange={setIsJoinGroupOpen}
+        handleJoinGroup={handleJoinGroup}
       />
     </div>
   );

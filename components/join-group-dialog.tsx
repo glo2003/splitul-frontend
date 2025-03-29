@@ -18,15 +18,16 @@ interface JoinGroupDialogProps {
   open: boolean;
   groups: Group[] | undefined;
   onOpenChange: (isOpen: boolean) => void;
+  handleJoinGroup: (groupName: string) => void;
 }
 
 export function JoinGroupDialog({
   open,
   groups,
   onOpenChange,
+  handleJoinGroup,
 }: JoinGroupDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [joiningGroup, setJoiningGroup] = useState("");
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
 
   useEffect(() => {
@@ -41,13 +42,6 @@ export function JoinGroupDialog({
       }
     }
   }, [groups, searchQuery]);
-
-  const handleJoinGroup = (groupName: string) => {
-    setJoiningGroup(groupName);
-    setTimeout(() => {
-      onOpenChange(false);
-    }, 1000);
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -88,10 +82,12 @@ export function JoinGroupDialog({
                   </div>
                   <Button
                     size="sm"
-                    onClick={() => handleJoinGroup(group.name)}
-                    disabled={joiningGroup === group.name}
+                    onClick={() => {
+                      onOpenChange(false);
+                      handleJoinGroup(group.name);
+                    }}
                   >
-                    {joiningGroup === group.name ? "Joining..." : "Join"}
+                    Join
                   </Button>
                 </div>
               ))

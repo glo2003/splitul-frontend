@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Group } from "@/api/groups";
 import { Skeleton } from "./ui/skeleton";
 import { ErrorMessage } from "./error-message";
+import { Separator } from "@/components/ui/separator";
 
 interface DesktopSidebarProps {
   groups: Group[] | undefined;
@@ -39,6 +40,7 @@ export function DesktopSidebar({
             {group.name}
           </Button>
         ))}
+        <Separator />
         <Button
           variant="ghost"
           className="justify-start text-primary"

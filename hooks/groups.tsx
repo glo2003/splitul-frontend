@@ -7,7 +7,19 @@ import {
   deleteGroup,
   addMember,
   Group,
+  getGroup,
+  addExpense,
+  ExpensesHistory,
+  getExpenses,
+  settleDebt,
 } from "@/api/groups";
+
+export function useGroup(groupName: string) {
+  return useQuery<Group, Error>({
+    queryKey: ["groups", groupName],
+    queryFn: () => getGroup(groupName),
+  });
+}
 
 export function useGroups() {
   return useQuery<Group[], Error>({
@@ -50,20 +62,79 @@ export function useAddMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       groupName,
       memberName,
     }: {
       groupName: string;
       memberName: string;
-    }) => addMember(groupName, memberName),
-    onSuccess: async (_, variables) => {
-      await queryClient.invalidateQueries({
+    }) => {
+      await addMember(groupName, memberName);
+      await queryClient.invalidateQueries({ queryKey: ["groups"] });
+      await queryClient.refetchQueries({ queryKey: ["groups"] });
+    },
+  });
+}
+
+export function useSettleDebt() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      groupName,
+      memberToSettle,
+      loggedInMember,
+    }: {
+      groupName: string;
+      memberToSettle: string;
+      loggedInMember: string;
+    }) => settleDebt(groupName, memberToSettle, loggedInMember),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
         queryKey: ["groups", variables.groupName],
       });
-      await queryClient.refetchQueries({
-        queryKey: ["groups"],
+      queryClient.invalidateQueries({
+        queryKey: ["expenses", variables.groupName],
       });
     },
+  });
+}
+
+export function useAddExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      groupName,
+      expense,
+    }: {
+      groupName: string;
+      expense: {
+        description: string;
+        amount: number;
+        purchaseDate: string;
+        paidBy: string;
+        split: string[];
+      };
+    }) => addExpense(groupName, expense),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupName],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["expenses", variables.groupName],
+      });
+    },
+  });
+}
+
+export function useExpenses(
+  groupName: string | undefined,
+  memberName: string | undefined,
+) {
+  return useQuery<ExpensesHistory, Error>({
+    queryKey: ["expenses", groupName, memberName],
+    queryFn: () => getExpenses(groupName!, memberName!),
+    enabled: !!groupName && !!memberName,
   });
 }

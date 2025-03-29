@@ -2,7 +2,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUser } from "../contexts/user-context";
+import { useUser } from "../hooks/user";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

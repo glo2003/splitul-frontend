@@ -13,7 +13,7 @@ export type Expense = {
   split: string[];
 };
 
-export type ExpensesHistoryResponse = {
+export type ExpensesHistory = {
   totalAmount: number;
   expenses: Expense[];
 };
@@ -109,7 +109,7 @@ const addExpense = async (
 const getExpenses = async (
   groupName: string,
   memberName: string,
-): Promise<ExpensesHistoryResponse> => {
+): Promise<ExpensesHistory> => {
   return httpClient.request({
     endpoint: `/groups/${groupName}/expenses`,
     method: "GET",
