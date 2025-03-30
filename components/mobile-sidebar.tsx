@@ -1,13 +1,16 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Link, Users, Plus, Settings, LogOut, ArrowRight } from "lucide-react";
+import { Users, Plus, Settings, LogOut, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Group } from "@/api/groups";
 import { ErrorMessage } from "./error-message";
 import { Skeleton } from "./ui/skeleton";
+import Link from "next/link";
 
 interface MobileSidebarProps {
   groups: Group[] | undefined;
   isLoading: boolean;
+  selectedGroup: string | undefined;
+  setSelectedGroup: (group: string | undefined) => void;
   setIsCreateGroupOpen: (isOpen: boolean) => void;
   setIsJoinGroupOpen: (isOpen: boolean) => void;
 }
@@ -15,6 +18,8 @@ interface MobileSidebarProps {
 export function MobileSidebar({
   groups,
   isLoading,
+  selectedGroup,
+  setSelectedGroup,
   setIsCreateGroupOpen,
   setIsJoinGroupOpen,
 }: MobileSidebarProps) {
@@ -26,7 +31,12 @@ export function MobileSidebar({
     return (
       <>
         {groups.map((group) => (
-          <Button key={group.name} variant="ghost" className="justify-start">
+          <Button
+            key={group.name}
+            variant={selectedGroup === group.name ? "secondary" : "ghost"}
+            className="justify-start"
+            onClick={() => setSelectedGroup(group.name)}
+          >
             <Users className="mr-2 h-5 w-5" />
             {group.name}
           </Button>
@@ -50,6 +60,7 @@ export function MobileSidebar({
       </>
     );
   };
+
   return (
     <ScrollArea className="h-full">
       <div className="flex flex-col gap-2 p-4">

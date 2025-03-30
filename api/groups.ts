@@ -1,8 +1,10 @@
 import { httpClient } from "./http-client";
 
 export type Member = {
-  name: string;
-  balance: number;
+  memberName: string;
+  debts: {
+    [memberName: string]: number;
+  };
 };
 
 export type Expense = {
@@ -10,11 +12,11 @@ export type Expense = {
   amount: number;
   purchaseDate: string;
   paidBy: string;
-  split: string[];
+  split: SplitType;
 };
 
 export type ExpensesHistory = {
-  totalAmount: number;
+  total: number;
   expenses: Expense[];
 };
 
@@ -22,6 +24,8 @@ export type Group = {
   members: string[];
   name: string;
 };
+
+export type SplitType = "equally";
 
 const listGroups = async (): Promise<Group[]> => {
   return httpClient.request({ endpoint: "/groups", method: "GET" }) as Promise<
@@ -91,13 +95,7 @@ const settleDebt = async (
 
 const addExpense = async (
   groupName: string,
-  expense: {
-    description: string;
-    amount: number;
-    purchaseDate: string;
-    paidBy: string;
-    split: string[];
-  },
+  expense: Expense,
 ): Promise<void> => {
   return httpClient.request({
     endpoint: `/groups/${groupName}/expenses`,

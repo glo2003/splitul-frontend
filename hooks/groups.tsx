@@ -12,6 +12,9 @@ import {
   ExpensesHistory,
   getExpenses,
   settleDebt,
+  getMembers,
+  Member,
+  Expense,
 } from "@/api/groups";
 
 export function useGroup(groupName: string) {
@@ -76,6 +79,21 @@ export function useAddMember() {
   });
 }
 
+export function useMembers(
+  groupName: string | undefined,
+  memberName: string | undefined,
+) {
+  return useQuery<Member[], Error>({
+    queryKey: ["members", groupName, memberName],
+    queryFn: () => {
+      if (!groupName || !memberName)
+        throw new Error("Group and member names are required");
+      return getMembers(groupName, memberName);
+    },
+    enabled: !!groupName && !!memberName,
+  });
+}
+
 export function useSettleDebt() {
   const queryClient = useQueryClient();
 
@@ -109,13 +127,7 @@ export function useAddExpense() {
       expense,
     }: {
       groupName: string;
-      expense: {
-        description: string;
-        amount: number;
-        purchaseDate: string;
-        paidBy: string;
-        split: string[];
-      };
+      expense: Expense;
     }) => addExpense(groupName, expense),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

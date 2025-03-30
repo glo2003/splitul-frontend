@@ -5,6 +5,16 @@ type HttpRequest = {
   body?: Record<string, unknown>;
 };
 
+export class ApiError extends Error {
+  description: string;
+
+  constructor(message: string, description: string) {
+    super(message);
+    this.name = "ApiError";
+    this.description = description;
+  }
+}
+
 class HttpClient {
   baseURL: string;
 
@@ -36,11 +46,12 @@ class HttpClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+        const responseBody = await response.json();
+        throw new ApiError(responseBody.error, responseBody.description);
       }
 
       if (response.status == 200) {
-        return response.json();
+        return await response.json();
       }
     } catch (error) {
       if (error instanceof Error) {
