@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "../../hooks/user";
-import { AddExpenseDialog } from "@/components/add-expense-dialog";
-import { CreateGroupDialog } from "@/components/create-group-dialog";
-import { DesktopSidebar } from "@/components/desktop-sidebar";
-import { JoinGroupDialog } from "@/components/join-group-dialog";
+import { AddExpenseDialog } from "@/components/dialogs/add-expense-dialog";
+import { CreateGroupDialog } from "@/components/dialogs/create-group-dialog";
+import { DesktopSidebar } from "@/components/sidebars/desktop-sidebar";
+import { JoinGroupDialog } from "@/components/dialogs/join-group-dialog";
 import {
   useCreateGroup,
   useGroups,
@@ -13,21 +13,22 @@ import {
   useExpenses,
   useMembers,
   useAddExpense,
+  useSettleDebt,
 } from "@/hooks/groups";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { GroupInformation } from "@/components/group-information";
-import { Expense } from "@/api/groups";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { ApiError } from "@/api/http-client";
+import { Expense } from "@/lib/types";
 
 export default function DashboardPage() {
   const { userName } = useUser();
   const router = useRouter();
 
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>();
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
 
@@ -44,6 +45,7 @@ export default function DashboardPage() {
   const createGroupMutation = useCreateGroup();
   const addMemberMutation = useAddMember();
   const addExpenseMutation = useAddExpense();
+  const settleDebt = useSettleDebt();
 
   useEffect(() => {
     if (!userName) {
@@ -104,6 +106,22 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSettleDebt = async (memberToSettle: string) => {
+    try {
+      await settleDebt.mutateAsync({
+        groupName: selectedGroup!,
+        memberToSettle,
+        loggedInMember: userName,
+      });
+    } catch (error) {
+      const apiError = error as ApiError;
+
+      toast.error(apiError.message, {
+        description: apiError.description,
+      });
+    }
+  };
+
   if (!userName) {
     return null;
   }
@@ -151,6 +169,7 @@ export default function DashboardPage() {
           isExpensesLoading={isExpensesLoading}
           isMembersLoading={isMembersLoading}
           setIsAddExpenseOpen={setIsAddExpenseOpen}
+          settleUp={handleSettleDebt}
         />
       </div>
       <AddExpenseDialog

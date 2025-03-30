@@ -1,20 +1,19 @@
+import { Group } from "@/lib/types";
+import { LogOut, Menu } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { MobileSidebar } from "./sidebars/mobile-sidebar";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Menu, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { MobileSidebar } from "./mobile-sidebar";
-import { Sheet, SheetTrigger, SheetContent, SheetTitle } from "./ui/sheet";
-import { Group } from "@/api/groups";
-import { Button } from "./ui/button";
-import Link from "next/link";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 
 type HeaderProps = {
   userName: string;

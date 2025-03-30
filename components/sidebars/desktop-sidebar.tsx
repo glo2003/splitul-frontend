@@ -1,18 +1,18 @@
 import { Home, Users, ArrowRight, Plus, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Group } from "@/api/groups";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorMessage } from "./error-message";
 import { Separator } from "@/components/ui/separator";
+import { Group } from "@/lib/types";
 
-interface DesktopSidebarProps {
+type DesktopSidebarProps = {
   groups: Group[] | undefined;
   isLoading: boolean;
   selectedGroup: string | undefined;
   setSelectedGroup: (group: string | undefined) => void;
   setIsCreateGroupOpen: (isOpen: boolean) => void;
   setIsJoinGroupOpen: (isOpen: boolean) => void;
-}
+};
 
 export function DesktopSidebar({
   groups,

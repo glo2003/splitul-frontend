@@ -1,18 +1,17 @@
-import React from "react";
+import { useState } from "react";
 import { TabsContent } from "../ui/tabs";
 import { Button } from "../ui/button";
-import { Member } from "@/api/groups";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Balance, Member } from "@/lib/types";
+import { SettleUpDialog } from "../dialogs/settle-up-dialog";
 
 type BalanceTabProps = {
   userName: string;
   members?: Member[];
+  settleUp: (memberToSettle: string) => void;
 };
 
-const getDebtors = (
-  userName: string,
-  members: Member[],
-): { memberName: string; amount: number }[] => {
+const getDebtors = (userName: string, members: Member[]): Balance[] => {
   return members
     .filter((member) => member.debts[userName] > 0)
     .map((member) => ({
@@ -21,10 +20,7 @@ const getDebtors = (
     }));
 };
 
-const getCreditors = (
-  userName: string,
-  members: Member[],
-): { memberName: string; amount: number }[] => {
+const getCreditors = (userName: string, members: Member[]): Balance[] => {
   const currentUser = members.find((member) => member.memberName === userName);
   if (currentUser?.debts) {
     return Object.entries(currentUser.debts)
@@ -38,19 +34,27 @@ const getCreditors = (
   return [];
 };
 
-export const BalanceTab = ({ userName, members }: BalanceTabProps) => {
+export const BalanceTab = ({
+  userName,
+  members,
+  settleUp,
+}: BalanceTabProps) => {
+  const [isSettleUpOpen, setIsSettleUpOpen] = useState(false);
   const debtors = getDebtors(userName, members || []);
   const creditors = getCreditors(userName, members || []);
   const balances = [...debtors, ...creditors].sort((a, b) =>
     a.memberName.toLowerCase().localeCompare(b.memberName.toLowerCase()),
   );
-  console.log("balances", balances);
 
   return (
     <TabsContent value="balances" className="p-4 md:p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold">Current Balances</h3>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsSettleUpOpen(true)}
+        >
           Settle Up
         </Button>
       </div>
@@ -89,6 +93,12 @@ export const BalanceTab = ({ userName, members }: BalanceTabProps) => {
           </div>
         ))}
       </div>
+      <SettleUpDialog
+        open={isSettleUpOpen}
+        onOpenChange={setIsSettleUpOpen}
+        creditors={creditors}
+        settleUp={settleUp}
+      />
     </TabsContent>
   );
 };

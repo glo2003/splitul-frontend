@@ -1,4 +1,3 @@
-import { ExpensesHistory, Member } from "@/api/groups";
 import { Plus } from "lucide-react";
 import React from "react";
 import { Button } from "./ui/button";
@@ -7,6 +6,7 @@ import { OverviewTab } from "./tabs/overview-tab";
 import { BalanceTab } from "./tabs/balance-tab";
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
+import { Member, ExpensesHistory } from "@/lib/types";
 
 type GroupInformationProps = {
   userName: string;
@@ -17,6 +17,7 @@ type GroupInformationProps = {
   isExpensesLoading: boolean;
   isMembersLoading: boolean;
   setIsAddExpenseOpen: (isOpen: boolean) => void;
+  settleUp: (memberToSettle: string) => void;
 };
 
 export const GroupInformation = ({
@@ -27,8 +28,8 @@ export const GroupInformation = ({
   isGroupsLoading,
   isExpensesLoading,
   isMembersLoading,
-
   setIsAddExpenseOpen,
+  settleUp,
 }: GroupInformationProps) => {
   if (isGroupsLoading) {
     return (
@@ -92,7 +93,11 @@ export const GroupInformation = ({
             members={members}
             isMembersLoading={isMembersLoading}
           />
-          <BalanceTab userName={userName} members={members} />
+          <BalanceTab
+            userName={userName}
+            members={members}
+            settleUp={settleUp}
+          />
         </Tabs>
       </div>
     </main>

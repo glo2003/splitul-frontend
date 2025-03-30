@@ -6,16 +6,13 @@ import {
   createGroup,
   deleteGroup,
   addMember,
-  Group,
   getGroup,
   addExpense,
-  ExpensesHistory,
   getExpenses,
   settleDebt,
   getMembers,
-  Member,
-  Expense,
 } from "@/api/groups";
+import { Group, Member, Expense, ExpensesHistory } from "@/lib/types";
 
 export function useGroup(groupName: string) {
   return useQuery<Group, Error>({
@@ -28,6 +25,32 @@ export function useGroups() {
   return useQuery<Group[], Error>({
     queryKey: ["groups"],
     queryFn: listGroups,
+  });
+}
+
+export function useMembers(
+  groupName: string | undefined,
+  memberName: string | undefined,
+) {
+  return useQuery<Member[], Error>({
+    queryKey: ["members", groupName, memberName],
+    queryFn: () => {
+      if (!groupName || !memberName)
+        throw new Error("Group and member names are required");
+      return getMembers(groupName, memberName);
+    },
+    enabled: !!groupName && !!memberName,
+  });
+}
+
+export function useExpenses(
+  groupName: string | undefined,
+  memberName: string | undefined,
+) {
+  return useQuery<ExpensesHistory, Error>({
+    queryKey: ["expenses", groupName, memberName],
+    queryFn: () => getExpenses(groupName!, memberName!),
+    enabled: !!groupName && !!memberName,
   });
 }
 
@@ -79,18 +102,28 @@ export function useAddMember() {
   });
 }
 
-export function useMembers(
-  groupName: string | undefined,
-  memberName: string | undefined,
-) {
-  return useQuery<Member[], Error>({
-    queryKey: ["members", groupName, memberName],
-    queryFn: () => {
-      if (!groupName || !memberName)
-        throw new Error("Group and member names are required");
-      return getMembers(groupName, memberName);
+export function useAddExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      groupName,
+      expense,
+    }: {
+      groupName: string;
+      expense: Expense;
+    }) => addExpense(groupName, expense),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupName],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["expenses", variables.groupName],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["members", variables.groupName],
+      });
     },
-    enabled: !!groupName && !!memberName,
   });
 }
 
@@ -114,39 +147,9 @@ export function useSettleDebt() {
       queryClient.invalidateQueries({
         queryKey: ["expenses", variables.groupName],
       });
-    },
-  });
-}
-
-export function useAddExpense() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      groupName,
-      expense,
-    }: {
-      groupName: string;
-      expense: Expense;
-    }) => addExpense(groupName, expense),
-    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupName],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["expenses", variables.groupName],
+        queryKey: ["members", variables.groupName],
       });
     },
-  });
-}
-
-export function useExpenses(
-  groupName: string | undefined,
-  memberName: string | undefined,
-) {
-  return useQuery<ExpensesHistory, Error>({
-    queryKey: ["expenses", groupName, memberName],
-    queryFn: () => getExpenses(groupName!, memberName!),
-    enabled: !!groupName && !!memberName,
   });
 }

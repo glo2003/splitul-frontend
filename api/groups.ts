@@ -1,31 +1,5 @@
+import { Group, Member, Expense, ExpensesHistory } from "@/lib/types";
 import { httpClient } from "./http-client";
-
-export type Member = {
-  memberName: string;
-  debts: {
-    [memberName: string]: number;
-  };
-};
-
-export type Expense = {
-  description: string;
-  amount: number;
-  purchaseDate: string;
-  paidBy: string;
-  split: SplitType;
-};
-
-export type ExpensesHistory = {
-  total: number;
-  expenses: Expense[];
-};
-
-export type Group = {
-  members: string[];
-  name: string;
-};
-
-export type SplitType = "equally";
 
 const listGroups = async (): Promise<Group[]> => {
   return httpClient.request({ endpoint: "/groups", method: "GET" }) as Promise<

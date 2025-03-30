@@ -1,10 +1,10 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Users, Plus, Settings, LogOut, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Group } from "@/api/groups";
-import { ErrorMessage } from "./error-message";
-import { Skeleton } from "./ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Group } from "@/lib/types";
+import { ArrowRight, LogOut, Plus, Settings, Users } from "lucide-react";
 import Link from "next/link";
+import { ErrorMessage } from "./error-message";
 
 interface MobileSidebarProps {
   groups: Group[] | undefined;

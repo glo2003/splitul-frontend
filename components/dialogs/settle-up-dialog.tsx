@@ -16,21 +16,21 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
+import { Balance } from "@/lib/types";
 
 type SettleUpDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  creditors: { memberName: string; amount: number };
-  amount: number;
-  onSettleUp: () => void;
+  creditors: Balance[];
+  settleUp: (memberToSettle: string) => void;
 };
 
 export function SettleUpDialog({
   open,
-  onOpenChange,
   creditors,
-  onSettleUp,
+  onOpenChange,
+  settleUp,
 }: SettleUpDialogProps) {
   const [selectedCreditor, setSelectedCreditor] = useState<string>("");
   const [isConfirming, setIsConfirming] = useState(false);
@@ -44,7 +44,7 @@ export function SettleUpDialog({
 
     try {
       setIsConfirming(true);
-      await onSettleUp(selectedCreditor, selectedAmount);
+      settleUp(selectedCreditor);
       onOpenChange(false);
       setSelectedCreditor("");
     } catch (error) {
@@ -79,7 +79,7 @@ export function SettleUpDialog({
                     key={creditor.memberName}
                     value={creditor.memberName}
                   >
-                    <div className="flex justify-between items-center w-full">
+                    <div className="flex justify-between items-center w-full gap-2">
                       <span>{creditor.memberName}</span>
                       <span className="text-muted-foreground">
                         {formatToAmount(Math.abs(creditor.amount))}
