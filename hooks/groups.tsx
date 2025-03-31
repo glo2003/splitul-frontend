@@ -35,9 +35,7 @@ export function useMembers(
   return useQuery<Member[], Error>({
     queryKey: ["members", groupName, memberName],
     queryFn: () => {
-      if (!groupName || !memberName)
-        throw new Error("Group and member names are required");
-      return getMembers(groupName, memberName);
+      return getMembers(groupName!, memberName!);
     },
     enabled: !!groupName && !!memberName,
   });
@@ -59,8 +57,8 @@ export function useCreateGroup() {
 
   return useMutation({
     mutationFn: (groupName: string) => createGroup(groupName),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
         queryKey: ["groups"],
       });
     },

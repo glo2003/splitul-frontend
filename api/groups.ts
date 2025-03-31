@@ -8,7 +8,7 @@ const listGroups = async (): Promise<Group[]> => {
 };
 
 const createGroup = async (groupName: string): Promise<void> => {
-  httpClient.request({
+  return httpClient.request({
     endpoint: "/groups",
     method: "POST",
     body: { name: groupName },
@@ -37,7 +37,7 @@ const addMember = async (
   groupName: string,
   memberName: string,
 ): Promise<void> => {
-  httpClient.request({
+  return httpClient.request({
     endpoint: `/groups/${groupName}/members`,
     method: "POST",
     body: { memberName },

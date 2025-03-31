@@ -1,5 +1,5 @@
 import { Group } from "@/lib/types";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MobileSidebar } from "./sidebars/mobile-sidebar";
@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 
 type HeaderProps = {
   userName: string;
@@ -23,6 +22,7 @@ type HeaderProps = {
   setSelectedGroup: (group: string | undefined) => void;
   setIsCreateGroupOpen: (open: boolean) => void;
   setIsJoinGroupOpen: (open: boolean) => void;
+  setIsDeleteGroupOpen: (open: boolean) => void;
 };
 export const Header = ({
   userName,
@@ -32,30 +32,21 @@ export const Header = ({
   setSelectedGroup,
   setIsCreateGroupOpen,
   setIsJoinGroupOpen,
+  setIsDeleteGroupOpen,
 }: HeaderProps) => {
   const router = useRouter();
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 sm:max-w-none">
-          <SheetTitle></SheetTitle>
-          <MobileSidebar
-            groups={groups}
-            isLoading={isGroupsLoading}
-            selectedGroup={selectedGroup}
-            setSelectedGroup={setSelectedGroup}
-            setIsCreateGroupOpen={setIsCreateGroupOpen}
-            setIsJoinGroupOpen={setIsJoinGroupOpen}
-          />
-        </SheetContent>
-      </Sheet>
+      <MobileSidebar
+        groups={groups}
+        isLoading={isGroupsLoading}
+        selectedGroup={selectedGroup}
+        setSelectedGroup={setSelectedGroup}
+        setIsCreateGroupOpen={setIsCreateGroupOpen}
+        setIsJoinGroupOpen={setIsJoinGroupOpen}
+        setIsDeleteGroupOpen={setIsDeleteGroupOpen}
+      />
       <div className="flex items-center gap-2">
         <Link
           href="/dashboard"

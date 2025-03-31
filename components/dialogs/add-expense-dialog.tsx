@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Expense, Member, SplitType } from "@/api/groups";
+import { Member, Expense, SplitType } from "@/lib/types";
 
 type AddExpenseDialogProps = {
   userName: string;

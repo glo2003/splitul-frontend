@@ -1,12 +1,13 @@
+import { AddExpenseDialog } from "@/components/dialogs/add-expense-dialog";
+import { BalanceTab } from "@/components/tabs/balance-tab";
+import { OverviewTab } from "@/components/tabs/overview-tab";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Expense, ExpensesHistory, Member } from "@/lib/types";
 import { Plus } from "lucide-react";
-import React from "react";
-import { Button } from "./ui/button";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
-import { OverviewTab } from "./tabs/overview-tab";
-import { BalanceTab } from "./tabs/balance-tab";
-import { Skeleton } from "./ui/skeleton";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Member, ExpensesHistory } from "@/lib/types";
 
 type GroupInformationProps = {
   userName: string;
@@ -16,7 +17,7 @@ type GroupInformationProps = {
   isGroupsLoading: boolean;
   isExpensesLoading: boolean;
   isMembersLoading: boolean;
-  setIsAddExpenseOpen: (isOpen: boolean) => void;
+  addExpense: (expense: Expense) => void;
   settleUp: (memberToSettle: string) => void;
 };
 
@@ -28,9 +29,11 @@ export const GroupInformation = ({
   isGroupsLoading,
   isExpensesLoading,
   isMembersLoading,
-  setIsAddExpenseOpen,
+  addExpense,
   settleUp,
 }: GroupInformationProps) => {
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+
   if (isGroupsLoading) {
     return (
       <main className="flex flex-col">
@@ -100,6 +103,13 @@ export const GroupInformation = ({
           />
         </Tabs>
       </div>
+      <AddExpenseDialog
+        userName={userName}
+        members={members?.filter((member) => member.memberName !== userName)}
+        addExpense={addExpense}
+        open={isAddExpenseOpen}
+        onOpenChange={setIsAddExpenseOpen}
+      />
     </main>
   );
 };

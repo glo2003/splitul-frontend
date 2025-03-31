@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "../../hooks/user";
-import { AddExpenseDialog } from "@/components/dialogs/add-expense-dialog";
 import { CreateGroupDialog } from "@/components/dialogs/create-group-dialog";
 import { DesktopSidebar } from "@/components/sidebars/desktop-sidebar";
 import { JoinGroupDialog } from "@/components/dialogs/join-group-dialog";
@@ -14,6 +13,7 @@ import {
   useMembers,
   useAddExpense,
   useSettleDebt,
+  useDeleteGroup,
 } from "@/hooks/groups";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
@@ -22,15 +22,16 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { ApiError } from "@/api/http-client";
 import { Expense } from "@/lib/types";
+import { RemoveGroupDialog } from "@/components/dialogs/remove-group-dialog";
 
 export default function DashboardPage() {
   const { userName } = useUser();
   const router = useRouter();
 
   const [selectedGroup, setSelectedGroup] = useState<string>();
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isJoinGroupOpen, setIsJoinGroupOpen] = useState(false);
+  const [isDeleteGroupOpen, setIsDeleteGroupOpen] = useState(false);
 
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
   const { data: members, isLoading: isMembersLoading } = useMembers(
@@ -43,6 +44,7 @@ export default function DashboardPage() {
   );
 
   const createGroupMutation = useCreateGroup();
+  const deleteGroupMutation = useDeleteGroup();
   const addMemberMutation = useAddMember();
   const addExpenseMutation = useAddExpense();
   const settleDebt = useSettleDebt();
@@ -97,6 +99,8 @@ export default function DashboardPage() {
         groupName: selectedGroup!,
         expense,
       });
+
+      toast.success("Expense added successfully");
     } catch (error) {
       const apiError = error as ApiError;
 
@@ -113,6 +117,8 @@ export default function DashboardPage() {
         memberToSettle,
         loggedInMember: userName,
       });
+
+      toast.success("Settled up successfully");
     } catch (error) {
       const apiError = error as ApiError;
 
@@ -122,20 +128,24 @@ export default function DashboardPage() {
     }
   };
 
+  const handleDeleteGroup = async (groupName: string) => {
+    try {
+      await deleteGroupMutation.mutateAsync({
+        groupName,
+        memberName: userName,
+      });
+      toast.success("Group deleted successfully");
+    } catch (error) {
+      const apiError = error as ApiError;
+
+      toast.error(apiError.message, {
+        description: apiError.description,
+      });
+    }
+  };
   if (!userName) {
     return null;
   }
-
-  // const deleteGroupMutation = useDeleteGroup();
-  //
-  // const handleDeleteGroup = async (groupName: string, memberName: string) => {
-  //   try {
-  //     await deleteGroupMutation.mutateAsync({ groupName, memberName });
-  //     // Handle success
-  //   } catch (error) {
-  //     // Handle error
-  //   }
-  // };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -147,19 +157,19 @@ export default function DashboardPage() {
         setSelectedGroup={setSelectedGroup}
         setIsCreateGroupOpen={setIsCreateGroupOpen}
         setIsJoinGroupOpen={setIsJoinGroupOpen}
+        setIsDeleteGroupOpen={setIsDeleteGroupOpen}
       />
       <div className="grid flex-1 md:grid-cols-[240px_1fr]">
-        <aside className="hidden border-r md:block">
-          <DesktopSidebar
-            key={groups?.length}
-            groups={groups?.filter((group) => group.members.includes(userName))}
-            isLoading={isGroupsLoading}
-            selectedGroup={selectedGroup}
-            setSelectedGroup={setSelectedGroup}
-            setIsCreateGroupOpen={setIsCreateGroupOpen}
-            setIsJoinGroupOpen={setIsJoinGroupOpen}
-          />
-        </aside>
+        <DesktopSidebar
+          key={groups?.length}
+          groups={groups?.filter((group) => group.members.includes(userName))}
+          isLoading={isGroupsLoading}
+          selectedGroup={selectedGroup}
+          setSelectedGroup={setSelectedGroup}
+          setIsCreateGroupOpen={setIsCreateGroupOpen}
+          setIsJoinGroupOpen={setIsJoinGroupOpen}
+          setIsDeleteGroupOpen={setIsDeleteGroupOpen}
+        />
         <GroupInformation
           userName={userName}
           members={members}
@@ -168,17 +178,10 @@ export default function DashboardPage() {
           isGroupsLoading={isGroupsLoading}
           isExpensesLoading={isExpensesLoading}
           isMembersLoading={isMembersLoading}
-          setIsAddExpenseOpen={setIsAddExpenseOpen}
+          addExpense={handleAddExpense}
           settleUp={handleSettleDebt}
         />
       </div>
-      <AddExpenseDialog
-        userName={userName}
-        members={members?.filter((member) => member.memberName !== userName)}
-        addExpense={handleAddExpense}
-        open={isAddExpenseOpen}
-        onOpenChange={setIsAddExpenseOpen}
-      />
       <CreateGroupDialog
         open={isCreateGroupOpen}
         onOpenChange={setIsCreateGroupOpen}
@@ -189,6 +192,16 @@ export default function DashboardPage() {
         groups={groups}
         onOpenChange={setIsJoinGroupOpen}
         handleJoinGroup={handleJoinGroup}
+      />
+      <RemoveGroupDialog
+        open={isDeleteGroupOpen}
+        groups={
+          groups
+            ? groups.filter((group) => group.members.includes(userName))
+            : []
+        }
+        onOpenChange={setIsDeleteGroupOpen}
+        deleteGroup={handleDeleteGroup}
       />
       <Toaster richColors />
     </div>
