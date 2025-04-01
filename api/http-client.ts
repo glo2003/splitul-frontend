@@ -65,4 +65,4 @@ class HttpClient {
   }
 }
 
-export const httpClient = new HttpClient("http://localhost:8080");
+export const httpClient = new HttpClient("http://localhost:80");

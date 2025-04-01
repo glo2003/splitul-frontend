@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Group } from "@/api/groups";
+import { Group } from "@/lib/types";
 
 interface JoinGroupDialogProps {
   open: boolean;

@@ -1,9 +1,9 @@
-import { ExpensesHistory, Member } from "@/api/groups";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { TabsContent } from "../ui/tabs";
 import React from "react";
 import { OverviewCard } from "./overview-card";
 import { formatToAmount } from "@/lib/utils";
+import { ExpensesHistory, Member } from "@/lib/types";
 
 type OverviewTabProps = {
   userName: string;
