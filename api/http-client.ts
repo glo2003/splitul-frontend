@@ -1,3 +1,5 @@
+const API_PORT = process.env.API_PORT;
+
 type HttpRequest = {
   endpoint: string;
   headers?: Record<string, string>;
@@ -65,4 +67,4 @@ class HttpClient {
   }
 }
 
-export const httpClient = new HttpClient("http://localhost:80");
+export const httpClient = new HttpClient(`http://localhost:${API_PORT}`);
