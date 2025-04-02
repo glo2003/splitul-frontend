@@ -1,4 +1,4 @@
-const API_PORT = process.env.API_PORT;
+const API_PORT = process.env.API_PORT ?? 8080;
 
 type HttpRequest = {
   endpoint: string;
@@ -66,5 +66,6 @@ class HttpClient {
     }
   }
 }
+console.log(API_PORT);
 
 export const httpClient = new HttpClient(`http://localhost:${API_PORT}`);
