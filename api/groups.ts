@@ -1,5 +1,6 @@
 import { Group, Member, Expense, ExpensesHistory } from "@/lib/types";
-import { httpClient } from "./http-client";
+import { initializeHttpClient } from "./http-client";
+const httpClient = await initializeHttpClient();
 
 const listGroups = async (): Promise<Group[]> => {
   return httpClient.request({ endpoint: "/groups", method: "GET" }) as Promise<

@@ -1,5 +1,3 @@
-const API_PORT = process.env.API_PORT ?? 8080;
-
 type HttpRequest = {
   endpoint: string;
   headers?: Record<string, string>;
@@ -66,6 +64,9 @@ class HttpClient {
     }
   }
 }
-console.log(API_PORT);
 
-export const httpClient = new HttpClient(`http://localhost:${API_PORT}`);
+export const initializeHttpClient = async () => {
+  const response = await fetch("/api/config");
+  const config = await response.json();
+  return new HttpClient(config.apiUrl);
+};
